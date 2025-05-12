@@ -15,7 +15,7 @@
 
       #chat-container {
         width: 100%;
-        max-width: 1200px; /* Matches the large card look */
+        max-width: 1200px;
         height: 90vh;
         background-color: #ffffff;
         border-radius: 12px;
@@ -48,7 +48,7 @@
       .bot-message {
         text-align: left;
         padding: 10px;
-        background-color: #e0f0ff; /* light blue for bot */
+        background-color: #e0f0ff;
         border-radius: 10px;
         margin: 6px 0;
       }
@@ -68,7 +68,7 @@
       }
 
       button {
-        background-color: #007bff; /* blue */
+        background-color: #007bff; 
         color: white;
         border: none;
         padding: 12px 18px;
@@ -138,10 +138,8 @@
           chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
           chatHistory.scrollTop = chatHistory.scrollHeight;
 
-          // Try to extract fields from the message using regex
           extractFields(botMessage);
 
-          // Check if all fields are filled, then show confirm button
           if (
             extractedData.place &&
             extractedData.district &&
@@ -149,7 +147,7 @@
             extractedData.date
           ) {
             document.getElementById("confirm-container").style.display =
-              "block"; // ✅ Show the whole container
+              "block";
           }
         } catch (error) {
           console.error("Error:", error);
