@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trip Confirmation</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .info {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎉 Trip Confirmation</h2>
+    <div class="info"><strong>Place:</strong> <%= place %></div>
+    <div class="info"><strong>District:</strong> <%= district %></div>
+    <div class="info"><strong>Budget:</strong> <%= budget %></div>
+    <div class="info"><strong>Date:</strong> <%= date %></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chatbot</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: start;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      #chat-container {
+        width: 100%;
+        max-width: 1200px; /* Matches the large card look */
+        height: 90vh;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #chat-history {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 10px 0;
+        margin-bottom: 16px;
+      }
+
+      .user-message {
+        text-align: right;
+        padding: 10px;
+        background-color: #e2e6ea;
+        border-radius: 10px;
+        margin: 6px 0;
+      }
+
+      .bot-message {
+        text-align: left;
+        padding: 10px;
+        background-color: #e0f0ff; /* light blue for bot */
+        border-radius: 10px;
+        margin: 6px 0;
+      }
+
+      form {
+        display: flex;
+        align-items: center;
+      }
+
+      input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px 0 0 8px;
+        outline: none;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #007bff; /* blue */
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      #loader {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-container">
+      <h1>AI TRAVEL GUIDE</h1>
+      <div id="chat-history"></div>
+      <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Enter your message" />
+        <button type="submit">Send</button>
+      </form>
+      <div
+        id="confirm-container"
+        style="display: none; margin-top: 10px; text-align: center"
+      >
+        <button id="confirm-btn">Yes, Confirm Details</button>
+      </div>
+    </div>
+
+    <div id="loader">
+      <img src="loader.gif" width="150px" alt="Loading..." />
+    </div>
+    <script>
+      const chatHistory = document.getElementById("chat-history");
+      const userInput = document.getElementById("user-input");
+      const form = document.getElementById("chat-form");
+      const loader = document.getElementById("loader");
+      const confirmBtn = document.getElementById("confirm-btn");
+
+      const messages = [];
+      const extractedData = { place: "", district: "", budget: "", date: "" };
+
+      async function sendMessage() {
+        const userMessage = userInput.value.trim();
+        if (!userMessage) return;
+        userInput.value = "";
+        messages.push({ role: "user", text: userMessage });
+        chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+
+        loader.style.display = "block";
+
+        try {
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages }),
+          });
+
+          const data = await response.json();
+          const botMessage = data.response;
+          messages.push({ role: "model", text: botMessage });
+
+          chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+          chatHistory.scrollTop = chatHistory.scrollHeight;
+
+          // Try to extract fields from the message using regex
+          extractFields(botMessage);
+
+          // Check if all fields are filled, then show confirm button
+          if (
+            extractedData.place &&
+            extractedData.district &&
+            extractedData.budget &&
+            extractedData.date
+          ) {
+            document.getElementById("confirm-container").style.display =
+              "block"; // ✅ Show the whole container
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        } finally {
+          loader.style.display = "none";
+        }
+      }
+
+      function extractFields(message) {
+        const placeMatch = message.match(/place:\s*(.+)/i);
+        const districtMatch = message.match(/district:\s*(.+)/i);
+        const budgetMatch = message.match(/budget:\s*(.+)/i);
+        const dateMatch = message.match(/date:\s*(.+)/i);
+
+        if (placeMatch) extractedData.place = placeMatch[1].trim();
+        if (districtMatch) extractedData.district = districtMatch[1].trim();
+        if (budgetMatch) extractedData.budget = budgetMatch[1].trim();
+        if (dateMatch) extractedData.date = dateMatch[1].trim();
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        sendMessage();
+      });
+
+      confirmBtn.addEventListener("click", async () => {
+        try {
+          console.log("cofirm");
+          const response = await fetch("/confirm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(extractedData),
+          });
+          document.getElementById("confirm-container").style.display = "none";
+        } catch (err) {
+          console.error("Confirmation Error:", err);
+          alert("❌ Failed to confirm details. Please try again.");
+        }
+      });
+    </script>
+  </body>
+</html>
